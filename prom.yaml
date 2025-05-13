@@ -1,0 +1,30 @@
+```
+extraScrapeConfigs: |
+  - job_name: 'redis_sentinel_nodes'
+    metrics_path: /scrape
+    kubernetes_sd_configs:
+    - role: pod
+    relabel_configs:
+      # 僅保留 redis-sentinel-node-* 的 Pod
+      - source_labels: [__meta_kubernetes_pod_name]
+        regex: redis-sentinel-node-.*
+        action: keep
+
+      # 提取 Pod IP + 26379，做為 target
+      - source_labels: [__meta_kubernetes_pod_ip]
+        regex: (.*)
+        target_label: __param_target
+        replacement: ${1}:26379
+
+      # 設定 instance label
+      - source_labels: [__param_target]
+        target_label: instance
+
+      # 顯示 namespace label
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+
+      # 根據 namespace 設定 exporter 目標地址
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: __address__
+        replacement: redis-exporter.$1.svc.cluster.local:9121
