@@ -1,0 +1,15 @@
+groups:
+- name: redis-sentinel-alerts
+  rules:
+  - alert: RedisSentinelMasterInconsistent
+    expr: |
+      count_values("master_address", redis_sentinel_master_sentinels)
+      by (namespace)
+      > 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Redis Sentinel master inconsistency in {{ $labels.namespace }}"
+      description: |
+        In namespace {{ $labels.namespace }}, multiple Redis Sentinel nodes are reporting different masters. Possible split-brain or Sentinel disagreement.
