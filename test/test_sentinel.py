@@ -1,15 +1,9 @@
 import os
+from dotenv import load_dotenv
 from redis.sentinel import Sentinel
 from redis import Redis
 
-# Load .env from same directory
-env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'env_example')
-with open(env_path) as f:
-    for line in f:
-        line = line.strip()
-        if line and not line.startswith('#') and '=' in line:
-            key, val = line.split('=', 1)
-            os.environ.setdefault(key.strip(), val.strip())
+load_dotenv()
 
 REDIS_IP = os.environ['REDIS_IP']
 REDIS_PASSWORD = os.environ['REDIS_PASSWORD']
